@@ -12,14 +12,25 @@ import java.util.Date;
 @Slf4j
 @Getter
 public class JwtTokenProvider {
-    private String JWT_SECRET = "KeySecretByCuongcuogngjdslfmmfdmkwrnfgaudiwngfjodvne783648dkhw4iu2ndk2e2099238d3idnjfhu3ybrej3hdmenf";
+    private String JWT_SECRET = "pob_token_@@@!!!";
     private int JWT_EXPIRATION = 60000;
+    private int JWT_FRESH_EXPIRATION = 300000;
 
     // Tạo ra jwt từ thông tin user
     public String generateToken(CustomUserDetail customUserDetail) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
         // Tạo chuỗi json web token từ username của user.
+        return Jwts.builder()
+                .setSubject(customUserDetail.getUsername())
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
+                .compact();
+    }
+    public String generateFreshToken(CustomUserDetail customUserDetail) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + JWT_FRESH_EXPIRATION);
         return Jwts.builder()
                 .setSubject(customUserDetail.getUsername())
                 .setIssuedAt(now)

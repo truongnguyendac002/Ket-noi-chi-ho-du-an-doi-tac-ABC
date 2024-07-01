@@ -1,5 +1,6 @@
 package com.msb.insurance.pob.rest;
 
+import com.msb.insurance.pob.common.Constant;
 import com.msb.insurance.pob.jwt.JwtTokenProvider;
 import com.msb.insurance.pob.model.request.LoginRequest;
 import com.msb.insurance.pob.model.request.SignupRequest;
@@ -9,7 +10,6 @@ import com.msb.insurance.pob.repository.entity.Users;
 import com.msb.insurance.pob.service.CustomUserDetail;
 import com.msb.insurance.pob.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -56,6 +56,15 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         CustomUserDetail customUserDetail = (CustomUserDetail) authentication.getPrincipal();
         String jwt = jwtTokenProvider.generateToken(customUserDetail);
-        return  ResponseEntity.ok(new JwtResponse(status.getStatus(),"",jwt,"Bearer",jwtTokenProvider.getJWT_EXPIRATION(),""));
+        String jwt_refresh = jwtTokenProvider.generateFreshToken(customUserDetail);
+        return  ResponseEntity.ok(new JwtResponse(
+                Constant.Success.getRespCode(),
+                Constant.Success.getRespDesc(),
+                jwt,
+                jwtTokenProvider.getJWT_EXPIRATION(),
+                jwtTokenProvider.getJWT_FRESH_EXPIRATION(),
+                jwt_refresh,
+                "Bearer",
+                ""));
     }
 }
