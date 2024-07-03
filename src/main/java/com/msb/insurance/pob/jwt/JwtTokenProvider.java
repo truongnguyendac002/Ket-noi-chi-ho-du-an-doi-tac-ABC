@@ -13,7 +13,7 @@ import java.util.Date;
 @Getter
 public class JwtTokenProvider {
     private String JWT_SECRET = "pob_token_@@@!!!";
-    private int JWT_EXPIRATION = 60000;
+    private int JWT_EXPIRATION = 6000000;
     private int JWT_FRESH_EXPIRATION = 300000;
 
     // Tạo ra jwt từ thông tin user
