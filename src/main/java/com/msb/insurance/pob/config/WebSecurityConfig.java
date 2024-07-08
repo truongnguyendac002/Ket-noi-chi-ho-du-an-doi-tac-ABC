@@ -2,6 +2,7 @@ package com.msb.insurance.pob.config;
 
 import com.msb.insurance.pob.jwt.JwtAuthenticationFilter;
 import com.msb.insurance.pob.service.CustomUserDetailService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig{
     @Autowired
     CustomUserDetailService customUserDetailService;
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
@@ -54,7 +60,7 @@ public class WebSecurityConfig{
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> registry
-                        .antMatchers("/partner/v1/oauth/**", "/api/v1/test/all","/api/v1/test/getAll").permitAll()
+                        .antMatchers("/partner/v1/oauth/**", "/api/v1/test/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

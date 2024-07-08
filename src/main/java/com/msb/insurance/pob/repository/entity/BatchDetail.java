@@ -1,7 +1,6 @@
-package com.msb.insurance.pob.model;
+package com.msb.insurance.pob.repository.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

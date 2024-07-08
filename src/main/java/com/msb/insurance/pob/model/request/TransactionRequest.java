@@ -1,16 +1,11 @@
 package com.msb.insurance.pob.model.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.msb.insurance.pob.model.SercBatchInfo;
+import com.msb.insurance.pob.repository.entity.SercBatchInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 
 @Getter
 @Setter

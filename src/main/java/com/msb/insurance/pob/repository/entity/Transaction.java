@@ -1,4 +1,4 @@
-package com.msb.insurance.pob.model;
+package com.msb.insurance.pob.repository.entity;
 
 import lombok.*;
 

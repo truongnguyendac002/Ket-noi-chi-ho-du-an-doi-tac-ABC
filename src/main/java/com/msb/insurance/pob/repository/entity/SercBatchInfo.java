@@ -1,6 +1,5 @@
-package com.msb.insurance.pob.model;
+package com.msb.insurance.pob.repository.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +7,6 @@ import lombok.ToString;
 
 import javax.persistence.*;
 
-import java.sql.Date;
 import java.util.List;
 
 @Getter
