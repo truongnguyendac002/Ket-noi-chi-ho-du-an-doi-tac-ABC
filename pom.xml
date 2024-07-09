@@ -80,6 +80,11 @@
 			<artifactId>modelmapper</artifactId>
 			<version>2.4.4</version> <!-- Đây là phiên bản mới nhất của ModelMapper tại thời điểm viết -->
 		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.9.0</version>
+		</dependency>
 
 	</dependencies>
 
@@ -97,7 +102,15 @@
 					</excludes>
 				</configuration>
 			</plugin>
-		</plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>16</source>
+                    <target>16</target>
+                </configuration>
+            </plugin>
+        </plugins>
 	</build>
 
 </project>

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -51,4 +52,7 @@ public class BatchDetail {
 
     @JsonProperty("bankNostro")
     private String bankNostro;
+
+    @Column(name = "status", nullable = false, columnDefinition = "int default 7")
+    private String status = "7";
 }

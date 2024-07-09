@@ -78,5 +78,10 @@ public class TransactionController {
         TransactionDto transactionDto = transactionMapper.convertToDto(transaction);
         return ResponseEntity.ok(new TransactionResponse(resCode, resDes,transactionDto));
     }
+
+    @RequestMapping(value = "/ack", method = RequestMethod.POST)
+    public ResponseEntity<String> ackTransaction(@RequestBody TransactionRequest request){
+        return transactionServiceImpl.ackProcess(request);
+    }
 }
 

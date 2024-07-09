@@ -26,8 +26,11 @@ public class SercBatchInfo {
 
     @JsonProperty("totalAmount")
     private double totalAmount;
+    @Column(name = "status", nullable = false, columnDefinition = "int default 2")
+    private String status = "2";
 
     @JsonProperty("sercBatchDetails")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BatchDetail> sercBatchDetails;
+
 }

@@ -15,6 +15,7 @@ public class SercBatchInfoDto {
     private String requestTime;
     @JsonProperty("totalAmount")
     private double totalAmount;
+
     @JsonProperty("status")
     private int status;
 }
