@@ -1,5 +1,7 @@
 package com.msb.insurance.pob.service.impl;
 
+import com.msb.insurance.pob.TestAccount.Account;
+import com.msb.insurance.pob.TestAccount.AccountService;
 import com.msb.insurance.pob.common.Constant;
 import com.msb.insurance.pob.common.GsonUtil;
 import com.msb.insurance.pob.common.PobErrorRequest;
@@ -9,6 +11,8 @@ import com.msb.insurance.pob.model.response.RespMessage;
 import com.msb.insurance.pob.model.response.ack.AckBatchDetailResponse;
 import com.msb.insurance.pob.model.response.ack.AckBatchResponse;
 import com.msb.insurance.pob.model.response.ack.AckTransactionResponse;
+import com.msb.insurance.pob.model.response.put.PutBatchResponse;
+import com.msb.insurance.pob.model.response.put.PutTransactionResponse;
 import com.msb.insurance.pob.repository.entity.BatchDetail;
 import com.msb.insurance.pob.repository.entity.SercBatchInfo;
 import com.msb.insurance.pob.repository.entity.Transaction;
@@ -36,6 +40,8 @@ public class TransactionServiceImpl implements ITransactionService {
     private TransactionRepository transactionRepository;
     @Autowired
     private ApplicationContext context;
+    @Autowired
+    private AccountService accountService;
 
     public String saveTransaction(Transaction transaction) {
         return transactionRepository.save(transaction).toString();
@@ -72,7 +78,7 @@ public class TransactionServiceImpl implements ITransactionService {
         resp.setMsgId(request.getMsgId());
         resp.setPartnerCode(request.getPartnerCode());
         resp.setSercBatchInfo(initAckBatchResponse(request.getSercBatchInfo()));
-
+        resp.setSignature(request.getSignature());
         return resp;
     }
 
@@ -157,6 +163,96 @@ public class TransactionServiceImpl implements ITransactionService {
 
     private boolean verifySignature(TransactionRequest request) {
         return true;
+    }
+
+
+
+    //xu ly put action
+    public ResponseEntity<?> putProcess(TransactionRequest request) {
+        try {
+            preHandlePutRequest(request);
+            Transaction transaction = new Transaction();
+            List<BatchDetail> batchDetailList = request.getSercBatchInfo().getSercBatchDetails();
+            List<Account> accountList = accountService.getAll();
+            if (checkMatchingAccount(batchDetailList,accountList) == true){
+                transaction.setMsgId(request.getMsgId());
+                transaction.setPartnerCode(request.getPartnerCode());
+                transaction.setSignature(request.getSignature());
+                transaction.setSercBathInfo(request.getSercBatchInfo());
+                transaction.setSignature(request.getSignature());
+            }else {
+                throw new PobTransactionException(PobErrorRequest.Fail);
+            }
+            saveTransaction(transaction);
+            PutTransactionResponse data = putProcessExc(request);
+//            RespMessage resp = new RespMessage(Constant.Success.name(), Constant.Success.getRespDesc(), data);
+            return new ResponseEntity<>(new RespMessage(Constant.Success.name(), Constant.Success.getRespDesc(), data), HttpStatus.OK);
+        } catch (PobTransactionException e) {
+            RespMessage resp = new RespMessage(e.getCode(), e.getDesc());
+            String result = GsonUtil.getInstance().toJson(resp);
+            log.info("RespMessage : " + result);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            RespMessage resp = new RespMessage(Constant.Internal_Server_Error.name(), Constant.Internal_Server_Error.getRespDesc());
+            String result = GsonUtil.getInstance().toJson(resp);
+            log.info("RespMessage : " + result);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+     public PutTransactionResponse putProcessExc(TransactionRequest request){
+        PutTransactionResponse resp = new PutTransactionResponse();
+        resp.setMsgId(request.getMsgId());
+        resp.setPartnerCode(request.getPartnerCode());
+        resp.setSignature(request.getSignature());
+        resp.setSercBatchInfo(initPutBatchResponse(request));
+        return resp;
+     }
+    public PutBatchResponse initPutBatchResponse(TransactionRequest request){
+        PutBatchResponse response = new PutBatchResponse();
+        response.setBatchId(request.getSercBatchInfo().getBatchId());
+        response.setQuantity(request.getSercBatchInfo().getQuantity());
+        response.setRequestTime(request.getSercBatchInfo().getRequestTime());
+        response.setTotalAmount(request.getSercBatchInfo().getTotalAmount());
+        response.setStatus(2);
+        return response;
+    }
+
+    public void preHandlePutRequest(TransactionRequest request) {
+        if (existsByMsgId(request.getMsgId())){
+            throw new PobTransactionException(PobErrorRequest.Fail);
+        }
+        String msgId = Optional.of(request).map(TransactionRequest::getMsgId).orElse(null);
+        if (!StringUtils.hasText(msgId)) {
+            throw new PobTransactionException(PobErrorRequest.Fail);
+        }
+        SercBatchInfo sercBatchInfo = Optional.of(request).map(TransactionRequest::getSercBatchInfo).orElse(null);
+        if (sercBatchInfo == null) {
+            throw new PobTransactionException(PobErrorRequest.Fail);
+        }
+        String batchId = Optional.of(sercBatchInfo).map(SercBatchInfo::getBatchId).orElse(null);
+        if (!StringUtils.hasText(batchId)) {
+            throw new PobTransactionException(PobErrorRequest.Fail);
+        }
+        int quantity = Optional.of(sercBatchInfo).map(SercBatchInfo::getQuantity).orElse(0);
+        if (quantity <= 0) {
+            throw new PobTransactionException(PobErrorRequest.Fail);
+        }
+        List<BatchDetail> batchDetails = Optional.of(sercBatchInfo).map(SercBatchInfo::getSercBatchDetails).orElse(null);
+        if (batchDetails.size() > 100) {
+            throw new PobTransactionException(PobErrorRequest.Big_Transaction);
+        }
+    }
+    public boolean checkMatchingAccount(List<BatchDetail> batchDetailList, List<Account> accountList) {
+        boolean foundMatchingAccount = false;
+        for (BatchDetail batchDetail : batchDetailList) {
+            for (Account account : accountList) {
+                if (batchDetail.getCAccount().equals(account.getCAccount()) && batchDetail.getCName().equals(account.getCName())) {
+                    foundMatchingAccount = true;
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
 
