@@ -9,4 +9,5 @@ public class AckTransactionResponse {
     private String msgId;
     private String partnerCode;
     private AckBatchResponse sercBatchInfo;
+    private String signature;
 }
