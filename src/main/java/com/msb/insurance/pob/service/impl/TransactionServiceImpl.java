@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -94,7 +95,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 .map(SercBatchInfo::getSercBatchDetails)
                 .map(details -> details.stream()
                         .map(BatchDetail::getSId)
-                        .toList())
+                        .collect(Collectors.toList()))
                 .orElse(null);
         for (BatchDetail batchDetail : sercBatchInfo.getSercBatchDetails()) {
             AckBatchDetailResponse ackBatchDetail = initAckBatchDetailResponse(batchDetail);
