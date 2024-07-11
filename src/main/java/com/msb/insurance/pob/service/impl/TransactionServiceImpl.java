@@ -264,5 +264,9 @@ public class TransactionServiceImpl implements ITransactionService {
         }
         return false;
     }
+
+    public RespMessage scanPendingTransactions() {
+        return null;
+    }
 }
 

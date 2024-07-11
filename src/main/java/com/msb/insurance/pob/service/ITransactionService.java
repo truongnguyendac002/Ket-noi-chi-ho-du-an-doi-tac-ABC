@@ -8,4 +8,5 @@ public interface ITransactionService {
     Boolean existsByMsgId(String msgId);
     ResponseEntity<String> ackProcess(TransactionRequest request);
     ResponseEntity<?> putProcess(TransactionRequest request);
+    RespMessage scanPendingTransactions();
 }

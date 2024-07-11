@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>API Form</title>
+</head>
+<body>
+<form action="#" th:action="@{/api/submit}" th:object="${apiForm}" method="post">
+    <label for="apiUrl">API URL:</label>
+    <input type="text" id="apiUrl" th:field="*{apiUrl}" />
+    <button type="submit">Submit</button>
+</form>
+</body>
+</html>
