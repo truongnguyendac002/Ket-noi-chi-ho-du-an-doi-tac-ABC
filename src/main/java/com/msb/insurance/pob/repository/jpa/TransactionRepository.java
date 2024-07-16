@@ -14,4 +14,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 
     @Query(value = "SELECT msg_id FROM t_transaction WHERE serc_batch_info_id = :batchId", nativeQuery = true)
     Optional<String> findMsgIdBySercBatchInfoBatchId(@Param("batchId") String batchId);
+
+
 }

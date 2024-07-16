@@ -184,7 +184,7 @@ public class TransactionServiceImpl implements ITransactionService {
             Transaction transaction = new Transaction();
             List<BatchDetail> batchDetailList = request.getSercBatchInfo().getSercBatchDetails();
             List<Account> accountList = accountService.getAll();
-            if (checkMatchingAccount(batchDetailList,accountList) == true){
+            if (checkMatchingAccount(batchDetailList, accountList)){
                 transaction.setMsgId(request.getMsgId());
                 transaction.setPartnerCode(request.getPartnerCode());
                 transaction.setSignature(request.getSignature());
@@ -263,10 +263,6 @@ public class TransactionServiceImpl implements ITransactionService {
             }
         }
         return false;
-    }
-
-    public RespMessage scanPendingTransactions() {
-        return null;
     }
 }
 
