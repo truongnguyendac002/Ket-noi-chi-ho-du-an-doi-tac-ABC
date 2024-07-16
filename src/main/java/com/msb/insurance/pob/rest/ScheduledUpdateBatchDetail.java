@@ -27,7 +27,7 @@ public class ScheduledUpdateBatchDetail {
 
         // Gửi tin nhắn đến API
         for (UpdateBatchDetailRequest resp : result) {
-            log.info("Sending notification: " + resp.toString());
+            log.info("Sending notification: " + resp.toString() + "to" + PartnerApiAddress.PARTNER_API_ADDRESS);
             try {
                 restTemplate.postForEntity(PartnerApiAddress.PARTNER_API_ADDRESS, resp, String.class);
                 log.info("Sent successfully: " + resp);

@@ -4,37 +4,53 @@ import com.msb.insurance.pob.common.PobErrorTransaction;
 import com.msb.insurance.pob.common.PobTransactionStatus;
 import com.msb.insurance.pob.model.response.notification.UpdateBatchDetailRequest;
 import com.msb.insurance.pob.repository.entity.BatchDetail;
+import com.msb.insurance.pob.repository.entity.SercBatchInfo;
 import com.msb.insurance.pob.repository.jpa.BatchDetailRepository;
+import com.msb.insurance.pob.repository.jpa.BatchRepository;
 import com.msb.insurance.pob.service.IBatchDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BatchDetailServiceImpl implements IBatchDetailService {
     @Autowired
     BatchDetailRepository batchDetailRepository;
+    @Autowired
+    BatchRepository sercBatchInfoRepository;
 
     private final String PARTNER_CODE = "ABC";
     @Override
+    @Transactional
     public List<UpdateBatchDetailRequest> scanPendingBatchDetail() {
-
-        Optional<List<BatchDetail>> op = batchDetailRepository.findPendingBatchDetail();
-        if (op.isEmpty()) {
-            return null;
-        }
-        List<BatchDetail> batchDetailList = op.get();
         List<UpdateBatchDetailRequest> resultList = new ArrayList<>();
-        for (BatchDetail batchDetail : batchDetailList) {
-            PobErrorTransaction errorCode = preHandle(batchDetail);
-            batchDetail.setStatus(errorCode.getCode());
-            batchDetailRepository.saveAndFlush(batchDetail);
-            resultList.add(initResponse(batchDetail));
-        }
+        List<SercBatchInfo> batchInfos = sercBatchInfoRepository.findByStatus("2");
+        for (SercBatchInfo batchInfo : batchInfos) {
+            boolean hasErrorStatus = false;
+            List<BatchDetail> batchDetails = batchInfo.getSercBatchDetails().stream()
+                    .filter(batchDetail -> "7".equals(batchDetail.getStatus()))
+                    .collect(Collectors.toList());
+            for (BatchDetail batchDetail : batchDetails) {
+                PobErrorTransaction errorCode = preHandle(batchDetail);
+                batchDetail.setStatus(errorCode.getCode());
+                resultList.add(initResponse(batchDetail));
 
+                if ("0".equals(batchDetail.getStatus())){
+                    hasErrorStatus = true;
+                    break;
+                }
+            }
+            if (hasErrorStatus == true){
+                batchInfo.setStatus("0");
+            }
+        }
+        sercBatchInfoRepository.saveAll(batchInfos);
         return resultList;
     }
+
     UpdateBatchDetailRequest initResponse(BatchDetail batchDetail) {
         UpdateBatchDetailRequest response = new UpdateBatchDetailRequest();
         response.setMsgId(UUID.randomUUID().toString());

@@ -5,9 +5,10 @@ import com.msb.insurance.pob.repository.entity.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface BatchRepository extends JpaRepository<SercBatchInfo, String> {
-
+    List<SercBatchInfo> findByStatus(String status);
 }
