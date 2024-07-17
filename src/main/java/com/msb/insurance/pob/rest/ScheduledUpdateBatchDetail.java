@@ -20,7 +20,7 @@ public class ScheduledUpdateBatchDetail {
 
     @Scheduled(fixedRateString = "${batch-detail.update-schedule}" )
     public void updateBatchDetail() {
-        System.out.println("updateBatchDetail ...");
+        log.info("scan BatchDetail ...");
         RestTemplate restTemplate = new RestTemplate();
         // Tạo tin nhắn
         List<UpdateBatchDetailRequest> result = batchDetailService.scanPendingBatchDetail();
