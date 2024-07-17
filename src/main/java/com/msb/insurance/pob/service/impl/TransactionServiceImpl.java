@@ -5,6 +5,7 @@ import com.msb.insurance.pob.TestAccount.AccountService;
 import com.msb.insurance.pob.common.Constant;
 import com.msb.insurance.pob.common.GsonUtil;
 import com.msb.insurance.pob.common.PobErrorRequest;
+import com.msb.insurance.pob.common.PobErrorTransaction;
 import com.msb.insurance.pob.exception.PobTransactionException;
 import com.msb.insurance.pob.model.request.TransactionRequest;
 import com.msb.insurance.pob.model.response.RespMessage;
@@ -143,11 +144,11 @@ public class TransactionServiceImpl implements ITransactionService {
         }
         String msgId = Optional.of(request).map(TransactionRequest::getMsgId).orElse(null);
         if (!StringUtils.hasText(msgId)) {
-            throw new PobTransactionException(PobErrorRequest.Fail);
+            throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"msgId not null");
         }
         String partnerCode = Optional.of(request).map(TransactionRequest::getPartnerCode).orElse(null);
         if (!StringUtils.hasText(partnerCode)) {
-            throw new PobTransactionException(PobErrorRequest.Fail);
+            throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"partnerCode not null");
         }
         SercBatchInfo sercBatchInfo = Optional.of(request).map(TransactionRequest::getSercBatchInfo).orElse(null);
         if (sercBatchInfo == null) {
@@ -155,15 +156,15 @@ public class TransactionServiceImpl implements ITransactionService {
         }
         String batchId = Optional.of(sercBatchInfo).map(SercBatchInfo::getBatchId).orElse(null);
         if (!StringUtils.hasText(batchId)) {
-            throw new PobTransactionException(PobErrorRequest.Fail);
+            throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"batchId not null");
         }
         int quantity = Optional.of(sercBatchInfo).map(SercBatchInfo::getQuantity).orElse(0);
         if (quantity <= 0) {
-            throw new PobTransactionException(PobErrorRequest.Fail);
+            throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"quantity invalid");
         }
         String requestTime = Optional.of(sercBatchInfo).map(SercBatchInfo::getRequestTime).orElse(null);
         if (!StringUtils.hasText(requestTime)) {
-            throw new PobTransactionException(PobErrorRequest.Fail);
+            throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"requestTime not null");
         }
         List<BatchDetail> batchDetails = Optional.of(sercBatchInfo).map(SercBatchInfo::getSercBatchDetails).orElse(null);
         if (batchDetails.size() > 100) {
@@ -191,7 +192,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 transaction.setSercBathInfo(request.getSercBatchInfo());
                 transaction.setSignature(request.getSignature());
             }else {
-                throw new PobTransactionException(PobErrorRequest.Fail);
+                throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"cAccount or cName not exists");
             }
             saveTransaction(transaction);
             PutTransactionResponse data = putProcessExc(request);
@@ -229,11 +230,11 @@ public class TransactionServiceImpl implements ITransactionService {
 
     public void preHandlePutRequest(TransactionRequest request) {
         if (existsByMsgId(request.getMsgId())){
-            throw new PobTransactionException(PobErrorRequest.Fail);
+            throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"msgId existed");
         }
         String msgId = Optional.of(request).map(TransactionRequest::getMsgId).orElse(null);
         if (!StringUtils.hasText(msgId)) {
-            throw new PobTransactionException(PobErrorRequest.Fail);
+            throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"msgId not null");
         }
         SercBatchInfo sercBatchInfo = Optional.of(request).map(TransactionRequest::getSercBatchInfo).orElse(null);
         if (sercBatchInfo == null) {
@@ -241,11 +242,11 @@ public class TransactionServiceImpl implements ITransactionService {
         }
         String batchId = Optional.of(sercBatchInfo).map(SercBatchInfo::getBatchId).orElse(null);
         if (!StringUtils.hasText(batchId)) {
-            throw new PobTransactionException(PobErrorRequest.Fail);
+            throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"batchId not null");
         }
         int quantity = Optional.of(sercBatchInfo).map(SercBatchInfo::getQuantity).orElse(0);
         if (quantity <= 0) {
-            throw new PobTransactionException(PobErrorRequest.Fail);
+            throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"quantity invalid");
         }
         List<BatchDetail> batchDetails = Optional.of(sercBatchInfo).map(SercBatchInfo::getSercBatchDetails).orElse(null);
         if (batchDetails.size() > 100) {

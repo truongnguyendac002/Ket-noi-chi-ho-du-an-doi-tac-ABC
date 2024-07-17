@@ -2,11 +2,15 @@ package com.msb.insurance.pob.exception;
 
 import com.msb.insurance.pob.common.PobErrorRequest;
 import com.msb.insurance.pob.common.PobErrorTransaction;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PobTransactionException extends RuntimeException{
     private String code;
 
