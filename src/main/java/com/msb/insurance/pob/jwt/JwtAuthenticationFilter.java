@@ -1,8 +1,14 @@
 package com.msb.insurance.pob.jwt;
 
 import com.msb.insurance.pob.service.CustomUserDetailService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -43,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Lấy jwt từ request
             String jwt = getJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+            if (StringUtils.hasText(jwt)) {
                 // Lấy username từ chuỗi jwt
                 String username = tokenProvider.getUsernameFromJWT(jwt);
                 // Lấy thông tin người dùng từ username
@@ -57,8 +63,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
+        }  catch (SignatureException e) {
+            log.error("Invalid JWT signature -> Message: " + e);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Unauthorized: Invalid JWT signature");
+            return;
+        } catch (MalformedJwtException e) {
+            log.error("Invalid JWT token -> Message: " + e);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Unauthorized: Invalid JWT token");
+            return;
+        } catch (ExpiredJwtException e) {
+            log.error("Expired JWT token -> Message: " + e);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Unauthorized: Expired JWT token");
+            return;
+        } catch (UnsupportedJwtException e) {
+            log.error("Unsupported JWT token -> Message: " + e);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Unauthorized: Unsupported JWT token");
+            return;
+        } catch (IllegalArgumentException e) {
+            log.error("JWT claims string is empty -> Message: " + e);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Unauthorized: JWT claims string is empty");
+            return;
         } catch (Exception ex) {
-            log.error("failed on set user authentication", ex);
+            log.error("Failed on set user authentication", ex);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Unauthorized: Authentication failed");
+            return;
         }
 
         filterChain.doFilter(request, response);

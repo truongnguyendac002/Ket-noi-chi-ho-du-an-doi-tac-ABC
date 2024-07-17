@@ -117,7 +117,7 @@ public class TransactionServiceImpl implements ITransactionService {
         for (BatchDetail batchDetail : sercBatchInfo.getSercBatchDetails()) {
             AckBatchDetailResponse ackBatchDetail = initAckBatchDetailResponse(batchDetail);
             if (!sIdList.contains(ackBatchDetail.getSId())) {
-                throw new PobTransactionException(PobErrorRequest.Fail);
+                throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"sId not exist in batchDetail");
             }
             sercBatchDetails.add(ackBatchDetail);
         }
