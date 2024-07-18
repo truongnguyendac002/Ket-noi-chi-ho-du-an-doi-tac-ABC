@@ -29,7 +29,7 @@ public class NotificationController {
     @RequestMapping(value = "/submit", method = RequestMethod.POST)
     public String submitForm(ApiForm apiForm, Model model) {
         PartnerApiAddress.PARTNER_API_ADDRESS = apiForm.getApiUrl();
-
+        log.info("Set API URL: " + PartnerApiAddress.PARTNER_API_ADDRESS);
         return "form";
     }
 
