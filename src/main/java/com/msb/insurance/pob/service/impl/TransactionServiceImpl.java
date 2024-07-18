@@ -60,7 +60,7 @@ public class TransactionServiceImpl implements ITransactionService {
         try {
             preHandleAckRequest(request);
             AckTransactionResponse data = ackProcessExc(request);
-            RespMessage resp = new RespMessage(Constant.Success.name(), Constant.Success.getRespDesc(), data);
+            RespMessage resp = new RespMessage(Constant.Success.getRespCode(), Constant.Success.getRespDesc(), data);
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.OK);
         } catch (PobTransactionException e) {
             RespMessage resp = new RespMessage(e.getCode(), e.getDesc());
@@ -68,7 +68,7 @@ public class TransactionServiceImpl implements ITransactionService {
             log.info("RespMessage : " + result);
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            RespMessage resp = new RespMessage(Constant.Internal_Server_Error.name(), Constant.Internal_Server_Error.getRespDesc());
+            RespMessage resp = new RespMessage(Constant.Internal_Server_Error.getRespCode(), Constant.Internal_Server_Error.getRespDesc());
             String result = GsonUtil.getInstance().toJson(resp);
             log.info("RespMessage : " + result);
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -191,20 +191,17 @@ public class TransactionServiceImpl implements ITransactionService {
                 transaction.setSignature(request.getSignature());
                 transaction.setSercBathInfo(request.getSercBatchInfo());
                 transaction.setSignature(request.getSignature());
-            }else {
-                throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"cAccount or cName not exists");
             }
             saveTransaction(transaction);
             PutTransactionResponse data = putProcessExc(request);
-//            RespMessage resp = new RespMessage(Constant.Success.name(), Constant.Success.getRespDesc(), data);
-            return new ResponseEntity<>(new RespMessage(Constant.Success.name(), Constant.Success.getRespDesc(), data), HttpStatus.OK);
+            return new ResponseEntity<>(new RespMessage(Constant.Success.getRespCode(), Constant.Success.getRespDesc(), data), HttpStatus.OK);
         } catch (PobTransactionException e) {
             RespMessage resp = new RespMessage(e.getCode(), e.getDesc());
             String result = GsonUtil.getInstance().toJson(resp);
             log.info("RespMessage : " + result);
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            RespMessage resp = new RespMessage(Constant.Internal_Server_Error.name(), Constant.Internal_Server_Error.getRespDesc());
+            RespMessage resp = new RespMessage(Constant.Internal_Server_Error.getRespCode(), Constant.Internal_Server_Error.getRespDesc());
             String result = GsonUtil.getInstance().toJson(resp);
             log.info("RespMessage : " + result);
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -254,16 +251,31 @@ public class TransactionServiceImpl implements ITransactionService {
         }
     }
     public boolean checkMatchingAccount(List<BatchDetail> batchDetailList, List<Account> accountList) {
-        boolean foundMatchingAccount = false;
         for (BatchDetail batchDetail : batchDetailList) {
+            boolean foundMatchingAccount = false;
+            boolean foundMatchingName = false;
+
             for (Account account : accountList) {
-                if (batchDetail.getCAccount().equals(account.getCAccount()) && batchDetail.getCName().equals(account.getCName())) {
+                if (batchDetail.getCAccount().equals(account.getCAccount())) {
                     foundMatchingAccount = true;
-                    return true;
+                }
+                if (batchDetail.getCName().equals(account.getCName())) {
+                    foundMatchingName = true;
+                }
+                if (foundMatchingAccount && foundMatchingName) {
+                    break; // Exit inner loop early if both are found
                 }
             }
+
+            if (!foundMatchingAccount) {
+                throw new PobTransactionException(PobErrorTransaction.CAccount_invalid);
+            }
+            if (!foundMatchingName) {
+                throw new PobTransactionException(PobErrorTransaction.Invalid_receiver_name);
+            }
         }
-        return false;
+        return true;
     }
+
 }
 

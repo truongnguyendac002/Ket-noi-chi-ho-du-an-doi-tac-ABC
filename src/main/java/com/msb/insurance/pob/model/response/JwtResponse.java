@@ -7,7 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 public class JwtResponse {
-    private int respCode;
+    private String respCode;
     private String respDesc;
     private String accessToken;
     private int expiresIn;
