@@ -130,7 +130,7 @@ public class TransactionServiceImpl implements ITransactionService {
         BatchDetailRepository batchDetailRepository = context.getBean(BatchDetailRepository.class);
         Optional<BatchDetail> op = batchDetailRepository.findById(batchDetail.getSId());
         if (op.isEmpty()) {
-            throw new PobTransactionException(PobErrorRequest.Fail);
+            throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(), "Fail, sId not exist");
         }
         BatchDetail detail = op.get();
         ackBatchDetailResponse.setSId(detail.getSId());

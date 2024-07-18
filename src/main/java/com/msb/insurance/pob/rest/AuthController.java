@@ -37,21 +37,7 @@ public class AuthController {
     @Autowired
     JwtTokenProvider jwtTokenProvider;
 
-    @RequestMapping(value = "/signup", method = RequestMethod.POST)
-    public ResponseEntity<?> registerUser(@RequestBody SignupRequest request){
-        ResponseEntity<?> preHandlingResponse = userService.preHandlingSignup(request);
-        if (preHandlingResponse != null) {
-            return preHandlingResponse;
-        }
-        Users user = new Users();
-        user.setId(request.getId());
-        user.setUsername(request.getUsername());
-        user.setPassword(encoder.encode(request.getPassword()));
-        userService.saveAndUpdate(user);
-        return ResponseEntity.ok(new ResponseMessage("Tao thanh cong"));
-    }
-
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @RequestMapping(value = "", method = RequestMethod.POST)
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest request, HttpServletResponse status){
         try {
             Authentication authentication = authenticationManager.authenticate(
