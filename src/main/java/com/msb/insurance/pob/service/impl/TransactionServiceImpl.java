@@ -151,6 +151,10 @@ public class TransactionServiceImpl implements ITransactionService {
             throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"partnerCode not null");
         }
         Optional<Transaction> transaction = transactionRepository.findById(request.getMsgId());
+        if (!transaction.isPresent()){
+            throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"msgId not existed");
+
+        }
         if (!transaction.get().getPartnerCode().equals(request.getPartnerCode())){
             throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"partnerCode not existed");
         }
