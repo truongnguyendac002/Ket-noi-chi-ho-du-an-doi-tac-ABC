@@ -150,6 +150,10 @@ public class TransactionServiceImpl implements ITransactionService {
         if (!StringUtils.hasText(partnerCode)) {
             throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"partnerCode not null");
         }
+        Optional<Transaction> transaction = transactionRepository.findById(request.getMsgId());
+        if (!transaction.get().getPartnerCode().equals(request.getPartnerCode())){
+            throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"partnerCode not existed");
+        }
         SercBatchInfo sercBatchInfo = Optional.of(request).map(TransactionRequest::getSercBatchInfo).orElse(null);
         if (sercBatchInfo == null) {
             throw new PobTransactionException(PobErrorRequest.Fail);
