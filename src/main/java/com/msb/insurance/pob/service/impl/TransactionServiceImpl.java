@@ -23,6 +23,7 @@ import com.msb.insurance.pob.repository.jpa.TransactionRepository;
 import com.msb.insurance.pob.service.ITransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +45,9 @@ public class TransactionServiceImpl implements ITransactionService {
     private ApplicationContext context;
     @Autowired
     private AccountService accountService;
+
+    @Value("${batch.max-size}")
+    private int BATCH_MAX_SIZE;
 
     public String saveTransaction(Transaction transaction) {
         return transactionRepository.save(transaction).toString();
@@ -114,10 +118,16 @@ public class TransactionServiceImpl implements ITransactionService {
                         .map(BatchDetail::getSId)
                         .collect(Collectors.toList()))
                 .orElse(null);
+        if (sIdList == null) {
+            throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"sId not null");
+        }
+        if (sIdList.size() > BATCH_MAX_SIZE) {
+            throw new PobTransactionException(PobErrorRequest.Big_Transaction.getRespCode(),PobErrorRequest.Big_Transaction.getRespDesc());
+        }
         for (BatchDetail batchDetail : sercBatchInfo.getSercBatchDetails()) {
             AckBatchDetailResponse ackBatchDetail = initAckBatchDetailResponse(batchDetail);
             if (!sIdList.contains(ackBatchDetail.getSId())) {
-                throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"sId not exist in batchDetail");
+                throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"sId not exist");
             }
             sercBatchDetails.add(ackBatchDetail);
         }
@@ -175,7 +185,7 @@ public class TransactionServiceImpl implements ITransactionService {
             throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"requestTime not null");
         }
         List<BatchDetail> batchDetails = Optional.of(sercBatchInfo).map(SercBatchInfo::getSercBatchDetails).orElse(null);
-        if (batchDetails.size() > 100) {
+        if (batchDetails.size() > BATCH_MAX_SIZE) {
             throw new PobTransactionException(PobErrorRequest.Big_Transaction);
         }
     }
@@ -254,7 +264,7 @@ public class TransactionServiceImpl implements ITransactionService {
             throw new PobTransactionException(PobErrorRequest.Fail.getRespCode(),"quantity invalid");
         }
         List<BatchDetail> batchDetails = Optional.of(sercBatchInfo).map(SercBatchInfo::getSercBatchDetails).orElse(null);
-        if (batchDetails.size() > 100) {
+        if (batchDetails.size() > BATCH_MAX_SIZE) {
             throw new PobTransactionException(PobErrorRequest.Big_Transaction);
         }
     }
